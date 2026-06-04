@@ -1,0 +1,795 @@
+{
+  "name": "Faceless Finance Shorts - Video Draft + Approval",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "daily-schedule-trigger",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1200,
+        40
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "channel-name",
+              "name": "channelName",
+              "value": "Faceless Finance Shorts",
+              "type": "string"
+            },
+            {
+              "id": "agent-name",
+              "name": "agentName",
+              "value": "Facdeless Finance Shorts Opreator",
+              "type": "string"
+            },
+            {
+              "id": "owner-email",
+              "name": "ownerEmail",
+              "value": "ssajvinder@gmail.com",
+              "type": "string"
+            },
+            {
+              "id": "manager-email",
+              "name": "managerEmail",
+              "value": "sajvindersingh8@gmail.com",
+              "type": "string"
+            },
+            {
+              "id": "approval-mode",
+              "name": "approvalMode",
+              "value": "draft_plus_approval",
+              "type": "string"
+            },
+            {
+              "id": "agent-endpoint",
+              "name": "agentEndpoint",
+              "value": "https://YOUR_AGENT_OPENAPI_ENDPOINT_HERE",
+              "type": "string"
+            },
+            {
+              "id": "voice-api-endpoint",
+              "name": "voiceApiEndpoint",
+              "value": "https://YOUR_VOICE_API_ENDPOINT_HERE",
+              "type": "string"
+            },
+            {
+              "id": "visual-api-endpoint",
+              "name": "visualApiEndpoint",
+              "value": "https://YOUR_VISUALS_OR_SCREEN_API_ENDPOINT_HERE",
+              "type": "string"
+            },
+            {
+              "id": "video-api-endpoint",
+              "name": "videoApiEndpoint",
+              "value": "https://YOUR_VIDEO_EDITING_API_ENDPOINT_HERE",
+              "type": "string"
+            },
+            {
+              "id": "approval-base-url",
+              "name": "approvalBaseUrl",
+              "value": "https://sajurai.app.n8n.cloud/webhook/faceless-finance-shorts-approval",
+              "type": "string"
+            },
+            {
+              "id": "sheet-id",
+              "name": "sheetId",
+              "value": "1t4OkeSHgCFMNrxB3ZsEOZxcqAv3w2y-2NxAaHdxd6eQ",
+              "type": "string"
+            },
+            {
+              "id": "target-length",
+              "name": "targetShortLengthSeconds",
+              "value": 45,
+              "type": "number"
+            },
+            {
+              "id": "video-format",
+              "name": "videoFormat",
+              "value": "vertical_1080x1920",
+              "type": "string"
+            },
+            {
+              "id": "publish-safety",
+              "name": "publishSafety",
+              "value": "create_youtube_draft_do_not_publish",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "workflow-config",
+      "name": "Workflow Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -930,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $input.first().json;\nconst now = new Date();\nconst draftId = \"ffs-video-\" + now.toISOString().replace(/[-:.TZ]/g, \"\").slice(0, 14);\nconst topicSeeds = [\n  \"emergency fund before investing\",\n  \"compound interest for beginners\",\n  \"inflation explained with everyday examples\",\n  \"budgeting without feeling restricted\",\n  \"good debt versus bad debt\",\n  \"lifestyle inflation and how to avoid it\",\n  \"saving versus investing\",\n  \"beginner money mistakes to avoid\"\n];\nconst seedTopic = topicSeeds[Math.floor(Math.random() * topicSeeds.length)];\nconst prompt =\n  \"You are the content brain for \" + config.channelName +\n  \". Create a complete YouTube Shorts production package for a finance channel.\" +\n  \" Seed topic: \" + seedTopic +\n  \". Owner: \" + config.ownerEmail +\n  \". Manager account for Google/API work: \" + config.managerEmail +\n  \". Mode: draft + approval only, do not publish automatically.\" +\n  \" Return strict JSON only with keys: topic, angle, hook, script, scene_plan,\" +\n  \" voice_notes, editing_instructions, thumbnail_prompt, thumbnail_text, title,\" +\n  \" description, hashtags, keywords, category, compliance_disclaimer, performance_notes.\" +\n  \" Rules: beginner friendly, no personal financial advice, no fake earnings claims,\" +\n  \" no guaranteed returns, no copyrighted brand assets, optimize title, thumbnail,\" +\n  \" hashtags and keywords for Shorts discovery.\";\n\nreturn [{\n  json: {\n    ...config,\n    draftId,\n    seedTopic,\n    prompt,\n    createdAt: now.toISOString(),\n    status: \"Generating Content Package\"\n  }\n}];"
+      },
+      "id": "build-content-brief",
+      "name": "Build Content Brief",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -660,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.agentEndpoint }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ agent: $json.agentName, task: 'create_full_short_content_package', channelName: $json.channelName, managerEmail: $json.managerEmail, prompt: $json.prompt }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "call-content-agent",
+      "name": "Agent: Topics Script SEO Thumbnail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -390,
+        -70
+      ],
+      "continueOnFail": true,
+      "notes": "Calls your OpenAPI agent to create topic, script, scene plan, thumbnail prompt, hashtags, keywords and metadata."
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $node[\"Build Content Brief\"].json;\nconst response = $input.first().json;\n\nfunction safeParse(value) {\n  if (!value) return {};\n  if (typeof value === \"object\") return value;\n  try {\n    return JSON.parse(value);\n  } catch {\n    return { rawText: String(value) };\n  }\n}\n\nconst body = safeParse(response.body ?? response.data ?? response);\nconst pkg = body.package ?? body.draft ?? body.result ?? body.output ?? body;\nconst topic = pkg.topic || base.seedTopic;\nconst hook = pkg.hook || (\"Most people miss this money lesson: \" + topic + \".\");\nconst script = pkg.script || pkg.rawText || (\n  hook + \"\\n\\nHere is the simple version of \" + topic +\n  \". Keep this educational, not personal financial advice.\"\n);\nconst defaultScenes = [\n  {\n    scene: 1,\n    duration_seconds: 4,\n    narration: hook,\n    on_screen_text: hook,\n    visual_prompt: \"Clean vertical finance visual about \" + topic,\n    editing_note: \"Fast hook, bold captions\"\n  },\n  {\n    scene: 2,\n    duration_seconds: 12,\n    narration: script,\n    on_screen_text: \"Simple money lesson\",\n    visual_prompt: \"Beginner friendly finance animation about \" + topic,\n    editing_note: \"Cut every 2-3 seconds\"\n  },\n  {\n    scene: 3,\n    duration_seconds: 8,\n    narration: \"Educational content only, not personal financial advice.\",\n    on_screen_text: \"Educational only\",\n    visual_prompt: \"Clean disclaimer end card\",\n    editing_note: \"Clear small disclaimer\"\n  }\n];\nconst scenePlan = Array.isArray(pkg.scene_plan) && pkg.scene_plan.length ? pkg.scene_plan : defaultScenes;\nconst hashtags = Array.isArray(pkg.hashtags) ? pkg.hashtags : [\"#Finance\", \"#MoneyTips\", \"#PersonalFinance\", \"#Shorts\"];\nconst keywords = Array.isArray(pkg.keywords) ? pkg.keywords : [\"finance\", \"money tips\", \"personal finance\", topic];\nconst title = pkg.title || (topic + \" in 45 Seconds #Shorts\");\nconst disclaimer = pkg.compliance_disclaimer || pkg.disclaimer || \"Educational content only. Not personal financial advice.\";\nconst description = pkg.description || (hook + \"\\n\\n\" + disclaimer + \"\\n\\n\" + hashtags.join(\" \"));\nconst thumbnailPrompt = pkg.thumbnail_prompt || (\n  \"High CTR YouTube Shorts thumbnail about \" + topic +\n  \", bold clean finance design, no copyrighted logos, readable text\"\n);\nconst thumbnailText = pkg.thumbnail_text || \"Money Tip\";\n\nreturn [{\n  json: {\n    ...base,\n    status: \"Content Package Ready\",\n    topic,\n    angle: pkg.angle || \"\",\n    hook,\n    script,\n    scenePlan,\n    voiceNotes: pkg.voice_notes || \"Clear confident voice, beginner friendly, energetic but trustworthy.\",\n    editingInstructions: pkg.editing_instructions || \"Vertical 9:16, captions on every line, fast pacing, clean finance visuals, disclaimer at end.\",\n    thumbnailPrompt,\n    thumbnailText,\n    title,\n    description,\n    hashtags: hashtags.join(\" \"),\n    keywords: keywords.join(\", \"),\n    category: pkg.category || \"Education\",\n    disclaimer,\n    performanceNotes: pkg.performance_notes || \"\",\n    contentPackageJson: JSON.stringify(pkg)\n  }\n}];"
+      },
+      "id": "normalize-content-package",
+      "name": "Normalize Content Package",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.voiceApiEndpoint }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ draftId: $json.draftId, script: $json.script, voice_notes: $json.voiceNotes, format: 'mp3', channelName: $json.channelName }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "generate-voice",
+      "name": "Voice API: Generate Narration",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        150,
+        -70
+      ],
+      "continueOnFail": true,
+      "notes": "Connect this to your voice API. It should return audioUrl or voiceUrl."
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $node[\"Normalize Content Package\"].json;\nconst response = $input.first().json;\nconst voiceUrl = response.audioUrl || response.voiceUrl || response.url || response.data?.audioUrl || response.body?.audioUrl || \"\";\nconst voiceAssetId = response.assetId || response.voiceAssetId || response.id || \"\";\n\nreturn [{\n  json: {\n    ...base,\n    status: voiceUrl ? \"Voice Ready\" : \"Voice Pending API Setup\",\n    voiceUrl,\n    voiceAssetId,\n    voiceApiResponse: JSON.stringify(response)\n  }\n}];"
+      },
+      "id": "normalize-voice",
+      "name": "Normalize Voice Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.visualApiEndpoint }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ draftId: $json.draftId, scene_plan: $json.scenePlan, thumbnail_prompt: $json.thumbnailPrompt, thumbnail_text: $json.thumbnailText, keywords: $json.keywords, format: $json.videoFormat }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "generate-visuals",
+      "name": "Visual API: Generate Screens + Thumbnail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        690,
+        -70
+      ],
+      "continueOnFail": true,
+      "notes": "Connect this to your image/screen/asset API. It should return sceneAssets and thumbnailUrl."
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $node[\"Normalize Voice Result\"].json;\nconst response = $input.first().json;\nconst sceneAssets = response.sceneAssets || response.assets || response.images || response.data?.sceneAssets || [];\nconst thumbnailUrl = response.thumbnailUrl || response.thumbnail_url || response.data?.thumbnailUrl || \"\";\n\nreturn [{\n  json: {\n    ...base,\n    status: thumbnailUrl || sceneAssets.length ? \"Visual Assets Ready\" : \"Visual Assets Pending API Setup\",\n    sceneAssets,\n    thumbnailUrl,\n    visualApiResponse: JSON.stringify(response)\n  }\n}];"
+      },
+      "id": "normalize-visuals",
+      "name": "Normalize Visual Assets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.videoApiEndpoint }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ draftId: $json.draftId, format: $json.videoFormat, target_seconds: $json.targetShortLengthSeconds, script: $json.script, scene_plan: $json.scenePlan, voice_url: $json.voiceUrl, voice_asset_id: $json.voiceAssetId, scene_assets: $json.sceneAssets, thumbnail_url: $json.thumbnailUrl, thumbnail_prompt: $json.thumbnailPrompt, captions: true, editing_instructions: $json.editingInstructions, disclaimer: $json.disclaimer }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "render-video",
+      "name": "Video API: Edit + Render Short",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1230,
+        -70
+      ],
+      "continueOnFail": true,
+      "notes": "Connect this to your video editing/render API. It should return videoUrl and optional thumbnailUrl."
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $node[\"Normalize Visual Assets\"].json;\nconst response = $input.first().json;\nconst videoUrl = response.videoUrl || response.video_url || response.url || response.data?.videoUrl || \"\";\nconst thumbnailUrl = response.thumbnailUrl || response.thumbnail_url || base.thumbnailUrl || \"\";\nconst renderJobId = response.jobId || response.renderJobId || response.id || \"\";\n\nreturn [{\n  json: {\n    ...base,\n    status: videoUrl ? \"Video Rendered\" : \"Video Pending API Setup\",\n    videoUrl,\n    thumbnailUrl,\n    renderJobId,\n    videoApiResponse: JSON.stringify(response)\n  }\n}];"
+      },
+      "id": "normalize-video",
+      "name": "Normalize Video Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.videoUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "download-rendered-video",
+      "name": "Download Rendered Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1770,
+        -70
+      ],
+      "notes": "Downloads the rendered MP4 from videoUrl into binary field data so the YouTube node can upload it."
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "upload",
+        "title": "={{ $json.title }}",
+        "regionCode": "US",
+        "categoryId": "27",
+        "binaryProperty": "data",
+        "options": {
+          "description": "={{ $json.description }}",
+          "notifySubscribers": false,
+          "privacyStatus": "private",
+          "publicStatsViewable": false,
+          "selfDeclaredMadeForKids": false,
+          "tags": "={{ $json.keywords }}"
+        }
+      },
+      "id": "youtube-upload-private-draft",
+      "name": "YouTube: Upload Private Draft",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        2040,
+        -70
+      ],
+      "continueOnFail": true,
+      "notes": "Select the YouTube OAuth credential for sajvindersingh8@gmail.com. Uploads as private and never publishes publicly."
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $node[\"Normalize Video Result\"].json;\nconst response = $input.first().json;\nconst youtubeVideoId = response.uploadId || response.youtubeVideoId || response.videoId || response.id || response.data?.id || response.body?.id || \"\";\nconst youtubeDraftUrl =\n  response.youtubeDraftUrl ||\n  response.draftUrl ||\n  response.url ||\n  response.data?.youtubeDraftUrl ||\n  (youtubeVideoId ? \"https://studio.youtube.com/video/\" + youtubeVideoId + \"/edit\" : \"\");\nconst youtubeUploadError = response.error?.message || response.error || response.message || \"\";\nconst approveUrl = base.approvalBaseUrl + \"?draftId=\" + encodeURIComponent(base.draftId) + \"&action=approve\";\nconst rejectUrl = base.approvalBaseUrl + \"?draftId=\" + encodeURIComponent(base.draftId) + \"&action=reject\";\nconst approvalEmailHtml =\n  \"<h2>Review YouTube Short Draft</h2>\" +\n  \"<p><strong>Title:</strong> \" + base.title + \"</p>\" +\n  \"<p><strong>Topic:</strong> \" + base.topic + \"</p>\" +\n  \"<p><strong>Status:</strong> Ready for approval, not published.</p>\" +\n  \"<p><strong>Video:</strong> <a href=\\\"\" + base.videoUrl + \"\\\">Open rendered video</a></p>\" +\n  \"<p><strong>Thumbnail:</strong> <a href=\\\"\" + base.thumbnailUrl + \"\\\">Open thumbnail</a></p>\" +\n  (youtubeDraftUrl\n    ? \"<p><strong>YouTube private draft:</strong> <a href=\\\"\" + youtubeDraftUrl + \"\\\">Open in YouTube Studio</a></p>\"\n    : \"<p><strong>YouTube private draft:</strong> Not created yet. Check the YouTube upload node credentials/output.</p>\") +\n  (youtubeUploadError ? \"<p><strong>YouTube upload note:</strong> \" + youtubeUploadError + \"</p>\" : \"\") +\n  \"<h3>Script</h3><pre style=\\\"white-space:pre-wrap;font-family:Arial,sans-serif\\\">\" + base.script + \"</pre>\" +\n  \"<h3>Description</h3><pre style=\\\"white-space:pre-wrap;font-family:Arial,sans-serif\\\">\" + base.description + \"</pre>\" +\n  \"<p><strong>Hashtags:</strong> \" + base.hashtags + \"</p>\" +\n  \"<p><strong>Keywords:</strong> \" + base.keywords + \"</p>\" +\n  \"<p><a href=\\\"\" + approveUrl + \"\\\">Approve</a> | <a href=\\\"\" + rejectUrl + \"\\\">Reject</a></p>\" +\n  \"<p>This workflow does not auto-publish.</p>\";\n\nreturn [{\n  json: {\n    ...base,\n    status: youtubeDraftUrl ? \"Pending Approval - YouTube Private Draft Ready\" : \"Pending Approval - YouTube Upload Needs Attention\",\n    youtubeDraftUrl,\n    youtubeVideoId,\n    youtubeUploadError,\n    approveUrl,\n    rejectUrl,\n    approvalEmailHtml,\n    youtubeApiResponse: JSON.stringify(response)\n  }\n}];"
+      },
+      "id": "prepare-approval-package",
+      "name": "Prepare Approval Package",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2310,
+        -70
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1t4OkeSHgCFMNrxB3ZsEOZxcqAv3w2y-2NxAaHdxd6eQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Drafts",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "draftId": "={{ $json.draftId }}",
+            "createdAt": "={{ $json.createdAt }}",
+            "status": "={{ $json.status }}",
+            "topic": "={{ $json.topic }}",
+            "title": "={{ $json.title }}",
+            "hook": "={{ $json.hook }}",
+            "script": "={{ $json.script }}",
+            "scenePlan": "={{ JSON.stringify($json.scenePlan) }}",
+            "voiceUrl": "={{ $json.voiceUrl }}",
+            "thumbnailPrompt": "={{ $json.thumbnailPrompt }}",
+            "thumbnailUrl": "={{ $json.thumbnailUrl }}",
+            "videoUrl": "={{ $json.videoUrl }}",
+            "youtubeDraftUrl": "={{ $json.youtubeDraftUrl }}",
+            "youtubeVideoId": "={{ $json.youtubeVideoId }}",
+            "hashtags": "={{ $json.hashtags }}",
+            "keywords": "={{ $json.keywords }}",
+            "description": "={{ $json.description }}",
+            "approveUrl": "={{ $json.approveUrl }}",
+            "rejectUrl": "={{ $json.rejectUrl }}",
+            "managerEmail": "={{ $json.managerEmail }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "save-production-draft",
+      "name": "Save Production Draft to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2580,
+        -70
+      ],
+      "notes": "Use Google Sheets credentials for sajvindersingh8@gmail.com."
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.managerEmail }}",
+        "subject": "={{ 'Approval needed: ' + $json.title }}",
+        "message": "={{ $json.approvalEmailHtml }}",
+        "options": {}
+      },
+      "id": "send-approval-email",
+      "name": "Send Approval Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2850,
+        -70
+      ],
+      "webhookId": "gmail-manager-approval",
+      "notes": "Use Gmail credentials for sajvindersingh8@gmail.com. This sends draft approval only."
+    },
+    {
+      "parameters": {
+        "path": "faceless-finance-shorts-approval",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "approval-webhook",
+      "name": "Approval Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -930,
+        360
+      ],
+      "webhookId": "faceless-finance-shorts-approval"
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = $input.first().json.query || {};\nconst draftId = query.draftId || \"unknown-draft\";\nconst action = String(query.action || \"\").toLowerCase();\nconst status = action === \"approve\" ? \"Approved - Ready to Post\" : action === \"reject\" ? \"Rejected - Needs Revision\" : \"Needs Review\";\nconst reviewedAt = new Date().toISOString();\n\nreturn [{\n  json: {\n    draftId,\n    action,\n    status,\n    reviewedAt,\n    reviewedBy: \"sajvindersingh8@gmail.com\",\n    message: \"Draft \" + draftId + \" marked as \" + status + \".\"\n  }\n}];"
+      },
+      "id": "handle-approval",
+      "name": "Handle Approval",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -660,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1t4OkeSHgCFMNrxB3ZsEOZxcqAv3w2y-2NxAaHdxd6eQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Approvals",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "draftId": "={{ $json.draftId }}",
+            "status": "={{ $json.status }}",
+            "action": "={{ $json.action }}",
+            "reviewedAt": "={{ $json.reviewedAt }}",
+            "reviewedBy": "={{ $json.reviewedBy }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "save-approval-log",
+      "name": "Save Approval Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -390,
+        360
+      ],
+      "notes": "Logs approve/reject clicks."
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.message + ' You can close this tab.' }}",
+        "options": {}
+      },
+      "id": "approval-response",
+      "name": "Approval Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -120,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Full video draft + approval setup\n\n1. Agent creates topic, script, scenes, thumbnail prompt, title, hashtags and keywords.\n2. Voice API creates narration.\n3. Visual API creates screen assets and thumbnail.\n4. Video API edits/renders the vertical Short.\n5. n8n downloads the MP4 and uploads it to YouTube as private.\n6. Email goes to sajvindersingh8@gmail.com for approval.\n\nConnect the YouTube OAuth credential for sajvindersingh8@gmail.com on the YouTube node. This workflow does not auto-publish.",
+        "height": 340,
+        "width": 500
+      },
+      "id": "setup-note",
+      "name": "Setup Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1190,
+        -560
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Workflow Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Config": {
+      "main": [
+        [
+          {
+            "node": "Build Content Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Content Brief": {
+      "main": [
+        [
+          {
+            "node": "Agent: Topics Script SEO Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent: Topics Script SEO Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Normalize Content Package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Content Package": {
+      "main": [
+        [
+          {
+            "node": "Voice API: Generate Narration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice API: Generate Narration": {
+      "main": [
+        [
+          {
+            "node": "Normalize Voice Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Voice Result": {
+      "main": [
+        [
+          {
+            "node": "Visual API: Generate Screens + Thumbnail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visual API: Generate Screens + Thumbnail": {
+      "main": [
+        [
+          {
+            "node": "Normalize Visual Assets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Visual Assets": {
+      "main": [
+        [
+          {
+            "node": "Video API: Edit + Render Short",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video API: Edit + Render Short": {
+      "main": [
+        [
+          {
+            "node": "Normalize Video Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Video Result": {
+      "main": [
+        [
+          {
+            "node": "Download Rendered Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Rendered Video": {
+      "main": [
+        [
+          {
+            "node": "YouTube: Upload Private Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube: Upload Private Draft": {
+      "main": [
+        [
+          {
+            "node": "Prepare Approval Package",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Approval Package": {
+      "main": [
+        [
+          {
+            "node": "Save Production Draft to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Production Draft to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval Webhook": {
+      "main": [
+        [
+          {
+            "node": "Handle Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Approval": {
+      "main": [
+        [
+          {
+            "node": "Save Approval Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Approval Log": {
+      "main": [
+        [
+          {
+            "node": "Approval Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "active": false,
+  "versionId": "video-draft-approval-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
